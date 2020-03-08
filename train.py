@@ -1,101 +1,57 @@
 import argparse
-import json
-from pathlib import Path
-from validation import validation_binary, validation_multi
-import os
-#os.environ["CUDA_VISIBLE_DEVICES"] = "0"
-
 import torch
+from pathlib import Path
+from validation import validation_multi
 from torch import nn
 from torch.optim import Adam
 from torch.utils.data import DataLoader
 import torch.backends.cudnn as cudnn
-import torch.backends.cudnn
-
-from models import UNet11, LinkNet34, UNet, UNet16, AlbuNet,DUNet11, DUNet16
-from models_new import DinkNet34, DinkNet50, DinkNet101
-from loss import LossBinary, LossMulti, LossMultiRE,calculate_l1_loss
+from models import DUNet16
+from loss import LossMultiRE
 from dataset import RoboticsDataset
 import utils
-
 from prepare_train_val import get_split
-
-from albumentations import (
-    HorizontalFlip,
-    VerticalFlip,
-    Normalize,
-    Compose
-)
+from albumentations import (HorizontalFlip,
+                            VerticalFlip,
+                            Normalize,
+                            Compose)
 
 
 def main():
+    
     parser = argparse.ArgumentParser()
     arg = parser.add_argument
-    arg('--jaccard-weight', default=0.5, type=float)
+    arg('--alpha', default=0.2, type=float)
+    arg('--beta', default=0.6, type=float)
+    arg('--gama', default=0.2, type=float)
     arg('--device-ids', type=str, default='0', help='For example 0,1 to run on two GPUs')
     arg('--fold', type=int, help='fold', default=0)
     arg('--root', default='runs/debug', help='checkpoint root')
     arg('--batch-size', type=int, default=1)
     arg('--n-epochs', type=int, default=100)
     arg('--lr', type=float, default=0.0001)
-    arg('--workers', type=int, default=12)
-    arg('--type', type=str, default='binary', choices=['binary', 'parts', 'instruments'])
-    arg('--model', type=str, default='UNet')
-    arg('--loss_weight', type=float, default=0.5)
+    arg('--workers', type=int, default=6)
+    arg('--model', type=str, default='DUNet16')
     args = parser.parse_args()
 
     root = Path(args.root)
     root.mkdir(exist_ok=True, parents=True)
 
-    if args.type == 'parts':
-        num_classes = 4
-    elif args.type == 'instruments':
-        num_classes = 12
-    else:
-        num_classes = 1
+    num_classes = 12 
 
-    if args.model == 'UNet':
-        model = UNet(num_classes=num_classes)
-    elif args.model == 'UNet11':
-        model = UNet11(num_classes=num_classes, pretrained=True)
-    elif args.model == 'UNet16':
-        model = UNet16(num_classes=num_classes, pretrained=True)
-    elif args.model == 'LinkNet34':
-        model = LinkNet34(num_classes=num_classes, pretrained=True)
-    elif args.model == 'AlbuNet':
-        model = AlbuNet(num_classes=num_classes, pretrained=True)
-    elif args.model == 'DinkNet34':
-        model = DinkNet34(num_classes=num_classes)
-    elif args.model == 'DinkNet50':
-        model = DinkNet50(num_classes=num_classes)
-    elif args.model == 'DinkNet101':
-        model = DinkNet101(num_classes=num_classes)
-    elif args.model == 'DUNet11':
-        model = DUNet11(num_classes=num_classes, pretrained=True)
-    elif args.model == 'DUNet16':
+    if args.model == 'DUNet16':
         model = DUNet16(num_classes=num_classes, pretrained=True)
-    else:
-        model = UNet(num_classes=num_classes, input_channels=3)
-        
- 
-
 
     if torch.cuda.is_available():
         if args.device_ids:
             device_ids = list(map(int, args.device_ids.split(',')))
         else:
             device_ids = None
-        print(device_ids)
-        #torch.cuda.set_device(5)
         model = nn.DataParallel(model, device_ids=device_ids).cuda()
+    cudnn.benchmark = True        
 
-    if args.type == 'binary':
-        loss = LossBinary(jaccard_weight=args.jaccard_weight)
-    else:
-        loss = LossMultiRE(num_classes=num_classes, jaccard_weight=args.jaccard_weight)
-#        se_loss = calculate_l1_loss
+    loss = LossMultiRE(num_classes=num_classes, jaccard_weight=args.jaccard_weight)
 
-    cudnn.benchmark = True
 
     def make_loader(file_names, shuffle=False, transform=None, problem_type='instruments', batch_size=1):
         return DataLoader(
