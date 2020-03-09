@@ -3,7 +3,7 @@ from tqdm import tqdm
 import cv2
 import numpy as np
 import os
-import util.config
+from util.config import *
 
 def main():
     
