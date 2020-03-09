@@ -1,0 +1,4 @@
+albumentations==0.0.4
+tqdm
+Pillow==6.1
+scikit-learn

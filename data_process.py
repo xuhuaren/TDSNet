@@ -33,17 +33,20 @@ def main():
                 img = cv2.imread(str(file_name))
             except:
                 continue
+
+            try:
+                mask = cv2.imread(str(mask_folder / file_name.name))
+            except:
+                continue
             
             img = img[:height, :width]
             cv2.imwrite(str(cropped_train_path / instrument_folder / 'images' / file_name.name), img)
 
             mask_instruments = np.zeros((height, width))
-            mask = cv2.imread(str(mask_folder / file_name.name))
             for mask_label, sub_color in enumerate(class_color):
                 temp = np.logical_and(np.logical_and(mask[:,:,0] == sub_color[2], mask[:,:,1] == sub_color[1]),
                                       mask[:,:,2] == sub_color[0])
                 mask_instruments[temp] = mask_label 
-                
             mask_instruments = (mask_instruments[:height, :width]).astype(np.uint8)
             cv2.imwrite(str(instrument_mask_folder / file_name.name), mask_instruments)
             

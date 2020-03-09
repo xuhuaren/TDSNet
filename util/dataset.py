@@ -2,7 +2,6 @@ import torch
 import numpy as np
 import cv2
 from torch.utils.data import Dataset
-import prepare_data
 from albumentations.torch.functional import img_to_tensor
 
 def make_one_hot(labels, C=12):
