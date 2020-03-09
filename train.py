@@ -10,11 +10,12 @@ from albumentations import (HorizontalFlip,
                             VerticalFlip,
                             Normalize,
                             Compose)
-from util.validation import validation_multi
+from util.validation import validation
 from util.models import TDSNet
 from util.loss import LossHybrid
 from util.dataset import RoboticsDataset
 from util.train_val_split import get_split
+from util.config import *
 
 def make_loader(file_names, shuffle=False, transform=None, batch_size=1, works = 4):
     return DataLoader(
@@ -57,9 +58,6 @@ def main():
     root = Path(args.root)
     root.mkdir(exist_ok=True, parents=True)
 
-    num_classes = 12 
-    num_scenes = 3
-
     if args.model == 'TDSNet':
         model = TDSNet(num_classes = num_classes, num_scenes = num_scenes, pretrained=True)
     if torch.cuda.is_available():
@@ -76,15 +74,12 @@ def main():
     print('num train = {}, num_val = {}'.format(len(train_file_names), len(val_file_names)))
 
     train_loader = make_loader(train_file_names, shuffle=True, transform=train_transform(p=1), 
-                               batch_size=args.batch_size, num_classes=num_classes)
+                               batch_size=args.batch_size)
     valid_loader = make_loader(val_file_names, transform=val_transform(p=1), 
-                               batch_size=args.batch_size, num_classes=num_classes)
+                               batch_size=args.batch_size)
     
 
-    if args.type == 'binary':
-        valid = validation_binary
-    else:
-        valid = validation_multi
+    valid = validation
 
     utils.train(
         init_optimizer=lambda lr: Adam(model.parameters(), lr=lr),
@@ -95,7 +90,8 @@ def main():
         valid_loader=valid_loader,
         validation=valid,
         fold=args.fold,
-        num_classes=num_classes
+        num_classes=num_classes,
+        weights = [args.alpha, args.beta, args.gama]
     )
 
 

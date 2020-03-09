@@ -3,8 +3,9 @@ import numpy as np
 import cv2
 from torch.utils.data import Dataset
 from albumentations.torch.functional import img_to_tensor
+from util.config import *
 
-def make_one_hot(labels, C=12):
+def make_one_hot(labels, nums = num_classes):
     '''
     Converts an integer label torch.autograd.Variable to a one-hot Variable.
     
@@ -22,19 +23,18 @@ def make_one_hot(labels, C=12):
         N x C x H x W, where C is class number. One-hot encoded.
     '''
 
-    one_hot = np.zeros((C, labels.shape[0], labels.shape[1]))
-    for sub_c in range(C):
-        one_hot[sub_c,:,:]=np.array(labels==sub_c,dtype='int')
+    one_hot = np.zeros((nums, labels.shape[0], labels.shape[1]))
+    for num in range(nums):
+        one_hot[num,:,:] = np.array(labels == num, dtype='int')
         
     return one_hot
 
 class RoboticsDataset(Dataset):
-    def __init__(self, file_names: list, to_augment=False, transform=None, mode='train', problem_type=None):
+    def __init__(self, file_names: list, to_augment=False, transform=None, mode='train'):
         self.file_names = file_names
         self.to_augment = to_augment
         self.transform = transform
         self.mode = mode
-        self.problem_type = problem_type
 
     def __len__(self):
         return len(self.file_names)
@@ -50,10 +50,7 @@ class RoboticsDataset(Dataset):
         mask=make_one_hot(mask)
 
         if self.mode == 'train':
-            if self.problem_type == 'binary':
-                return img_to_tensor(image), torch.from_numpy(np.expand_dims(mask, 0)).float()
-            else:
-                return img_to_tensor(image), torch.from_numpy(mask).long(), str(img_file_name)
+            return img_to_tensor(image), torch.from_numpy(mask).long(), str(img_file_name)
         else:
             return img_to_tensor(image), str(img_file_name)
 
@@ -64,16 +61,8 @@ def load_image(path):
 
 
 def load_mask(path, problem_type):
-    if problem_type == 'binary':
-        mask_folder = 'binary_masks'
-        factor = prepare_data.binary_factor
-    elif problem_type == 'parts':
-        mask_folder = 'parts_masks'
-        factor = prepare_data.parts_factor
-    elif problem_type == 'instruments':
-        factor = prepare_data.instrument_factor
-        mask_folder = 'instruments_masks'
-
+    
+    mask_folder = 'instruments_masks'
     mask = cv2.imread(str(path).replace('images', mask_folder).replace('jpg', 'png'), 0)
 
-    return (mask / factor).astype(np.uint8)
+    return (mask).astype(np.uint8)
