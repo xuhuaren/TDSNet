@@ -5,7 +5,7 @@ from torch import nn
 from torch.optim import Adam
 from torch.utils.data import DataLoader
 import torch.backends.cudnn as cudnn
-import utils
+import util.utils as utils
 from albumentations import (HorizontalFlip,
                             VerticalFlip,
                             Normalize,
