@@ -72,7 +72,6 @@ def main():
 
     train_file_names, val_file_names = get_split(args.fold)
     print('num train = {}, num_val = {}'.format(len(train_file_names), len(val_file_names)))
-
     train_loader = make_loader(train_file_names, shuffle=True, transform=train_transform(p=1), 
                                batch_size=args.batch_size)
     valid_loader = make_loader(val_file_names, transform=val_transform(p=1), 

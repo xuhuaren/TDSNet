@@ -1,7 +1,6 @@
 import json
 from pathlib import Path
 from datetime import datetime
-from pathlib import Paths
 import random
 import numpy as np
 import torch.nn.functional as F
@@ -20,8 +19,8 @@ def write_event(log, step: int, **data):
     log.flush()
 
 
-def train(args, model, criterion, train_loader, valid_loader, validation, init_optimizer, n_epochs=None, fold=None,
-          num_classes=None, weights):
+def train(args, model, criterion, train_loader, valid_loader, validation, init_optimizer, weights, n_epochs=None, fold=None,
+          num_classes=None):
     
     lr = args.lr
     n_epochs = n_epochs or args.n_epochs
@@ -72,7 +71,7 @@ def train(args, model, criterion, train_loader, valid_loader, validation, init_o
                 output_seg, output_class, output_scene = model(inputs)
                 loss_seg = criterion(output_seg, targets)  
                 
-                scene_gt = filename[0].split('/')[1]
+                scene_gt = filename[0].split('/')[2]
                 if scene_gt in scene_0:
                     scene_gt = [0]
                 elif scene_gt in scene_1:
@@ -82,7 +81,7 @@ def train(args, model, criterion, train_loader, valid_loader, validation, init_o
                 scene_gt = torch.cuda.LongTensor(scene_gt)    
 
                 class_gt = [[1 if targets[0, c,:,:].sum()>0 else 0 for c in range(num_classes)]]
-                class_gt = torch.cuda.FloatTensor(exist_class)
+                class_gt = torch.cuda.FloatTensor(class_gt)
                 
                 loss_class = F.binary_cross_entropy(F.sigmoid(output_class), class_gt)
 
@@ -94,7 +93,7 @@ def train(args, model, criterion, train_loader, valid_loader, validation, init_o
                 loss_sync = F.binary_cross_entropy(F.sigmoid(output_class), class_pre)
                 
                 alpha, beta, gama = weights
-                loss += alpha * loss_class + beta * loss_sync + gama * loss_scene 
+                loss = loss_seg + alpha * loss_class + beta * loss_sync + gama * loss_scene 
                 
                 optimizer.zero_grad()
                 batch_size = inputs.size(0)

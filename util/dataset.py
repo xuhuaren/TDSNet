@@ -42,7 +42,7 @@ class RoboticsDataset(Dataset):
     def __getitem__(self, idx):
         img_file_name = self.file_names[idx]
         image = load_image(img_file_name)
-        mask = load_mask(img_file_name, self.problem_type)
+        mask = load_mask(img_file_name)
 
         data = {"image": image, "mask": mask}
         augmented = self.transform(**data)
@@ -60,7 +60,7 @@ def load_image(path):
     return cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
 
-def load_mask(path, problem_type):
+def load_mask(path):
     
     mask_folder = 'instruments_masks'
     mask = cv2.imread(str(path).replace('images', mask_folder).replace('jpg', 'png'), 0)

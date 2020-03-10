@@ -70,9 +70,9 @@ class CEBlock(nn.Module):
         self.dilate8 = nn.Conv2d(256, 256, kernel_size=3, dilation=8, padding=8)
         self.dilate16 = nn.Conv2d(256, 256, kernel_size=3, dilation=16, padding=16)
         
-        self.task0_1 = nn.Conv2d(256, 256, kernel_size=3, dilation=0, padding=1)  
-        self.task0_2 = nn.Conv2d(256, 256, kernel_size=3, dilation=0, padding=1)  
-        self.task1_2 = nn.Conv2d(256, 256, kernel_size=3, dilation=0, padding=1)  
+        self.task0_1 = nn.Conv2d(256, 256, kernel_size=3, padding=1)  
+        self.task0_2 = nn.Conv2d(256, 256, kernel_size=3, padding=1)  
+        self.task1_2 = nn.Conv2d(256, 256, kernel_size=3, padding=1)  
 
         for m in self.modules():
             if isinstance(m, nn.Conv2d) or isinstance(m, nn.ConvTranspose2d):
@@ -84,12 +84,11 @@ class CEBlock(nn.Module):
         x = nonlinearity(self.dilate0(x))
         dilate1_out = nonlinearity(self.dilate1(x))
         dilate2_out = nonlinearity(self.dilate2(dilate1_out))
-        dilate3_out = nonlinearity(self.dilate3(dilate2_out))
-        dilate4_out = nonlinearity(self.dilate4(dilate3_out))
-        dilate5_out = nonlinearity(self.dilate5(dilate4_out))
-        
+        dilate3_out = nonlinearity(self.dilate4(dilate2_out))
+        dilate4_out = nonlinearity(self.dilate8(dilate3_out))
+        dilate5_out = nonlinearity(self.dilate16(dilate4_out))
+
         latent = x + dilate1_out + dilate2_out + dilate3_out + dilate4_out + dilate5_out
-        
         out0_1 = nonlinearity(self.task0_1(latent))
         out0_2 = nonlinearity(self.task0_2(latent))
         out1_2 = nonlinearity(self.task1_2(latent)) 
@@ -191,8 +190,7 @@ class TDSNet(nn.Module):
         super().__init__()
         self.num_classes = num_classes
 
-        self.pool_class = nn.MaxPool2d(2, 2)
-        self.pool_scene = nn.MaxPool2d(2, 2)
+        self.pool = nn.MaxPool2d(2, 2)
         
         self.encoder = torchvision.models.vgg16(pretrained=pretrained).features
         self.relu = nn.ReLU(inplace=True)
@@ -228,7 +226,7 @@ class TDSNet(nn.Module):
                                    self.encoder[28],
                                    self.relu)
         
-        self.center0_1, self.center0_2, self.center1_2 = CEBlock()
+        self.center = CEBlock(512)
                 
         self.fc_scene = nn.Linear(512, 256)
         self.fc_scene_out = nn.Linear(256, num_scenes)
@@ -250,16 +248,14 @@ class TDSNet(nn.Module):
         conv4 = self.conv4(self.pool(conv3))
         conv5 = self.conv5(self.pool(conv4))
                 
-        center0_1 = self.center0_1(self.pool(conv5))  
-        center0_2 = self.center0_2(self.pool(conv5))          
-        center1_2 = self.center1_2(self.pool(conv5))        
+        center0_1, center0_2, center1_2 = self.center(self.pool(conv5))     
         
-        x = self.avgpool_class(torch.cat([center0_1, center_1_2])
+        x = self.avgpool_class(torch.cat([center0_1, center1_2], 1))
         x = x.view(x.size(0), -1)
         out_class = self.fc_class(x)
         out_class = self.fc_class_out(out_class)
         
-        x = self.avgpool_scene(torch.cat([center0_2, center_1_2])
+        x = self.avgpool_scene(torch.cat([center0_2, center1_2], 1))
         x = x.view(x.size(0), -1)
         out_scene = self.fc_scene(x)
         out_scene = self.fc_scene_out(out_scene)
