@@ -40,6 +40,30 @@ def val_transform(p=1):
 
 def main():
     
+    """
+    Training script which could obtain trained model
+
+    Args:
+        some parameters saved in ./util/config.py
+        alpha: weight of class task
+        beta: weight of sync task
+        gama: weight of scene task
+        device-ids: the device id in computer
+        fold: the validation set id
+        root: model saved path
+        batch-size: batch size
+        n-epochs: maximum epochs
+        lr: learning rate
+        workers: cpu kernal numbers
+        model: model which utilized
+        num_classes: class/segment task numbers; num_scenes class numbers saved in ./util/config.py
+        
+    Returns:
+        model saved in root path.
+    Raises:
+        None
+    """  
+    
     parser = argparse.ArgumentParser()
     arg = parser.add_argument
     arg('--alpha', default=0.2, type=float)
@@ -52,7 +76,7 @@ def main():
     arg('--n-epochs', type=int, default=100)
     arg('--lr', type=float, default=0.0001)
     arg('--workers', type=int, default=6)
-    arg('--model', type=str, default='DUNet16')
+    arg('--model', type=str, default='TDSNet')
     args = parser.parse_args()
 
     root = Path(args.root)

@@ -13,6 +13,16 @@ def calculate_l1_loss(output, target, lagrange_coef=0.0005):
 
    
 class LossHybrid:
+    
+      
+    """
+    Our proposed hybrid loss, cross-entropy combined with iou loss
+    Attributes:
+        jaccard_weight: iou loss weight
+        num_classes: segment class numbers
+    """  
+    
+    
     def __init__(self, jaccard_weight=0.5, class_weights=None, num_classes=1):
         if class_weights is not None:
             nll_weight = utils.cuda(

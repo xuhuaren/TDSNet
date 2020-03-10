@@ -20,17 +20,7 @@ class ConvRelu(nn.Module):
         x = self.activation(x)
         return x
 
-class ELayer(nn.Module):
-    def __init__(self, fc_input, pool_kernel, n_classes):
-        super().__init__()
-        self.avgpool = nn.AdaptiveAvgPool2d(1)
-        self.fc = nn.Linear(fc_input, n_classes)
-
-    def forward(self, x):
-        x = self.avgpool(x)
-        x = x.view(x.size(0), -1)
-        return (self.fc(x))
-    
+   
 class DecoderBlock(nn.Module):
     
     """
@@ -60,6 +50,20 @@ class DecoderBlock(nn.Module):
         return self.block(x)
     
 class CEBlock(nn.Module):
+    
+    """
+    Our proposed context ensemble module. By coupling each pair of the decomposed tasks, the receptive fields
+    enlarge their sizes, through the stacked dilated convolution with the dilated rates 1, 2, 4, 8, 16 in, respectively. 
+    In the output of the module, the task-task CE modules are further paralleled which could obtain features with 
+    dilated rates 1, 3, 7, 15, 31, 63.
+
+    Attributes:
+        out0_1: segment, class branch sharing
+        out0_2: segment, scene branch sharing
+        out1_2: scene, class branch sharing
+    """  
+    
+    
     def __init__(self,channel):
         super(CEBlock, self).__init__()
         
@@ -97,14 +101,17 @@ class CEBlock(nn.Module):
     
     
 class UNet16(nn.Module):
+    
+    """
+    num_classes: param num_classes
+    num_filters: param num_filters
+    pretrained: param pretrained
+                False - no pre-trained network used
+                True - encoder pre-trained with VGG16
+    """    
+    
     def __init__(self, num_classes=1, num_filters=32, pretrained=False):
-        """
-        :param num_classes:
-        :param num_filters:
-        :param pretrained:
-            False - no pre-trained network used
-            True - encoder pre-trained with VGG11
-        """
+        
         super().__init__()
         self.num_classes = num_classes
 
@@ -179,14 +186,26 @@ class UNet16(nn.Module):
 
   
 class TDSNet(nn.Module):
+    
+    """
+    The image is processed through the encoder and task-task context ensemble to arrive at the latent space. 
+    Then, the segmentation, class, and scene tasks are solved through individual decoders. A strong sync-regularization between 
+    the segmentation and class tasks is further used to augment the coherence of multi-task learning.
+    
+    Attributes:
+        num_classes: class task number
+        num_scenes: scene task number
+        num_filters: param num_filters
+        pretrained: param pretrained
+                False - no pre-trained network used
+                True - encoder pre-trained with VGG16
+    Returns:
+        segment, class and scene output block
+        
+    """      
+    
     def __init__(self, num_classes=1, num_scenes=1, num_filters=32, pretrained=False):
-        """
-        :param num_classes:
-        :param num_filters:
-        :param pretrained:
-            False - no pre-trained network used
-            True - encoder pre-trained with VGG11
-        """
+        
         super().__init__()
         self.num_classes = num_classes
 

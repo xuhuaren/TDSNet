@@ -24,11 +24,16 @@ def img_transform(p=1):
 def get_model(model_path, model_type="TDSNet"):
     
     """
-    :param model_path:
-    :param model_type: 'UNet', 'UNet16', 'UNet11', 'LinkNet34', 'AlbuNet'
-    :param problem_type: 'binary', 'parts', 'instruments'
-    :return:
-    """
+    get model scrpit
+    Args:
+        model_type: model which utilized
+        model_path: model saved path
+        num_classes, num_scenes: in ./util/config.py
+    Returns:
+        model: deployment model in cuda
+    Raises:
+        None
+    """  
     
     if model_type == "TDSNet":
         model = TDSNet(num_classes = num_classes, num_scenes = num_scenes)
@@ -47,6 +52,23 @@ def get_model(model_path, model_type="TDSNet"):
 
 
 def predict_evaluate(model, from_file_names, args, to_path, img_transform):
+    
+    """
+    come true prediction and evaluate module, prediction module could generate
+    color image, evaluate module could display dice score.
+    
+    Args:
+        model: model which utilized
+        from_file_names: filename list
+        args: some hyperparameters
+        to_path: prediction images saved path
+        img_transform: data augument mode
+        height, width, class_color in ./util/config.py
+    Returns:
+        prediction image saved in to_path; dice score displayed in command line
+    Raises:
+        None
+    """  
     
     loader = DataLoader(
         dataset=RoboticsDataset(from_file_names, transform=img_transform, mode='train'),
@@ -104,7 +126,5 @@ def main():
     predict_evaluate(model, file_names, args, output_path, img_transform=img_transform(p=1))
     
     
-    
-
 if __name__ == '__main__':
     main()

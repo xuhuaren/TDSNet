@@ -7,7 +7,20 @@ from util.config import *
 
 def main():
     
+    """
+    Prepare train/val dataset from raw data, considering the raw data has some redundancy data and some
+    images can not opened.
 
+    Args:
+        parameters saved in ./util/config.py
+        train_path: raw data loaded path, which could download from https://endovis.grand-challenge.org/
+
+    Returns:
+        parameters saved in ./util/config.py
+        cropped_train_path: post-processing images saved path
+    Raises:
+        None
+    """  
 
     instrument_index = os.listdir(train_path)
     

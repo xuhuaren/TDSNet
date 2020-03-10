@@ -22,6 +22,28 @@ def write_event(log, step: int, **data):
 def train(args, model, criterion, train_loader, valid_loader, validation, init_optimizer, weights, n_epochs=None, fold=None,
           num_classes=None):
     
+    """
+    training script which include loss calculate, segment loss, class loss, scene loss and sync loss.
+
+    Args:
+        args: parameters
+        model: load model
+        
+    Returns:
+        train_file_names: train image list
+        val_file_names: val image list  
+        criterion: loss segment loss
+        train_loader: train loader
+        valid_loader: val loader
+        validation: validation metric funcion
+        weights: each class weights
+        n_epochs: number of epochs
+        fold: validation set id
+        
+    Raises:
+        None
+    """ 
+    
     lr = args.lr
     n_epochs = n_epochs or args.n_epochs
     optimizer = init_optimizer(lr)
@@ -47,7 +69,6 @@ def train(args, model, criterion, train_loader, valid_loader, validation, init_o
     report_each = 10
     log = root.joinpath('train_{fold}.log'.format(fold=fold)).open('at', encoding='utf8')
     
-    valid_losses = []
     best_iou = -999999
     
     for epoch in range(epoch, n_epochs + 1):
@@ -112,7 +133,6 @@ def train(args, model, criterion, train_loader, valid_loader, validation, init_o
             tq.close()
             
             valid_metrics = validation(model, criterion, valid_loader, num_classes)
-            valid_loss = valid_metrics[0]
             valid_iou = valid_metrics[1] 
             
             if valid_iou > best_iou:

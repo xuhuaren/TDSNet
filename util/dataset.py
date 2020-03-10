@@ -6,6 +6,7 @@ from albumentations.torch.functional import img_to_tensor
 from util.config import *
 
 def make_one_hot(labels, nums = num_classes):
+    
     '''
     Converts an integer label torch.autograd.Variable to a one-hot Variable.
     
@@ -30,6 +31,17 @@ def make_one_hot(labels, nums = num_classes):
     return one_hot
 
 class RoboticsDataset(Dataset):
+    
+    """
+
+    RoboticsDataset is designed to generate robot18 challenge dataloader for pytorch,
+    which could generate image, label, filename.
+
+    Attributes:
+        file_names: image file name
+        to_augment: data augument method
+        mode: train model could output image, mask and file; other model only output image and filename.
+    """  
     def __init__(self, file_names: list, to_augment=False, transform=None, mode='train'):
         self.file_names = file_names
         self.to_augment = to_augment

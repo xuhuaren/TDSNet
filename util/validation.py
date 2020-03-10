@@ -46,6 +46,22 @@ def dice(y_true, y_pred):
 
 def validation(model: nn.Module, criterion, valid_loader, num_classes):
     
+    """
+    validation metric including dice and iou
+
+    Args:
+        model: load model
+        criterion: measure metric
+        valid_loader: validation data loader
+        num_classes: class task
+        
+    Returns:
+        valid_loss: valid loss calculate by gpu
+        average_iou: iou score calculate by cpu    
+    Raises:
+        None
+    """ 
+    
     with torch.no_grad():
         model.eval()
         losses = []
