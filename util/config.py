@@ -1,7 +1,7 @@
 from pathlib import Path
 
 data_path = Path('./data')
-train_path = data_path / 'raw'
+train_path = Path('/mnt/data/home/renxuhua/temp')
 cropped_train_path = data_path / 'cropted_train'
     
 height, width = 1024, 1280

@@ -24,11 +24,13 @@ def main():
             
             try:
                 img = cv2.imread(str(file_name))
+                img_shape = img.shape
             except:
                 continue
 
             try:
                 mask = cv2.imread(str(mask_folder / file_name.name))
+                mask_shape = mask.shape
             except:
                 continue
             
