@@ -7,7 +7,7 @@ from util.config import *
 def general_dice(y_true, y_pred):
     
     result = []
-    for instrument_id in range(1, num_classes + 1):
+    for instrument_id in range(num_classes):
         
         if np.all( y_true != instrument_id ):
             if np.all( y_pred != instrument_id ):
@@ -24,7 +24,7 @@ def general_jaccard(y_true, y_pred):
     result = []
 
 
-    for instrument_id in range(1, num_classes + 1):
+    for instrument_id in range(num_classes):
         if np.all( y_true != instrument_id ): 
             if np.all( y_pred != instrument_id ):
                 result += [1]
