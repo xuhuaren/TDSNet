@@ -31,10 +31,10 @@ def get_model(model_path, model_type="TDSNet"):
     """
     
     if model_type == "TDSNet":
-        model = TDSNet(num_classes=num_classes)
+        model = TDSNet(num_classes = num_classes, num_scenes = num_scenes)
     elif model_type == 'UNet16':
         model = UNet16(num_classes=num_classes)
-        
+    print(model_path)    
     state = torch.load(str(model_path))
     state = {key.replace('module.', ''): value for key, value in state['model'].items()}
     model.load_state_dict(state)
@@ -67,20 +67,19 @@ def predict_evaluate(model, from_file_names, args, to_path, img_transform):
             for i, image_name in enumerate(paths):
 
                 seg_mask = (outputs[i].data.cpu().numpy().argmax(axis=0)).astype(np.uint8)
-                gt_mask = (gt[i]).astype(np.uint8)
+                gt_mask = (gt[i].data.cpu().numpy().argmax(axis=0)).astype(np.uint8)
                 result_dice += [general_dice(gt_mask, seg_mask)]
-
                 instrument_folder = Path(paths[i]).parent.parent.name
                 (to_path / instrument_folder).mkdir(exist_ok=True, parents=True)
                 
                 full_mask = np.zeros((height, width, 3))
                 for mask_label, sub_color in enumerate(class_color):
-                    full_mask[t_mask==mask_label, 0]=sub_color[2]
-                    full_mask[t_mask==mask_label, 1]=sub_color[1]
-                    full_mask[t_mask==mask_label, 2]=sub_color[0]
+                    full_mask[seg_mask==mask_label, 0]=sub_color[2]
+                    full_mask[seg_mask==mask_label, 1]=sub_color[1]
+                    full_mask[seg_mask==mask_label, 2]=sub_color[0]
                 cv2.imwrite(str(to_path / instrument_folder / (Path(paths[i]).stem + '.png')), full_mask)
                 
-    print("The validation set with id{} dice score is {}".format(args.fold, np.mean(result_dice)))
+    print("The validation set with test set {} dice score is {}".format(args.fold, np.mean(result_dice)))
                 
                 
 def main():
@@ -89,7 +88,7 @@ def main():
     arg = parser.add_argument
     arg('--model_path', type=str, default='/runs/debug', help='path to model folder')
     arg('--model_type', type=str, default='TDSNet', help='network architecture')
-    arg('--output_path', type=str, help='path to save images', default='1')
+    arg('--output_path', type=str, help='path to save images', default='./data/predictions')
     arg('--batch-size', type=int, default=1)
     arg('--fold', type=int, default=0, help='-1: all folds')
     arg('--workers', type=int, default=10)

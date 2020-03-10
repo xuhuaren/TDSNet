@@ -70,7 +70,7 @@ def train(args, model, criterion, train_loader, valid_loader, validation, init_o
                     
                 output_seg, output_class, output_scene = model(inputs)
                 loss_seg = criterion(output_seg, targets)  
-                
+          
                 scene_gt = filename[0].split('/')[2]
                 if scene_gt in scene_0:
                     scene_gt = [0]

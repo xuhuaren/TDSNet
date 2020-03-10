@@ -5,7 +5,7 @@ from util.config import *
 
 def get_split(fold):
     
-    folds = {0: ['seq_1', 'seq2', 'seq3', 'seq4']}
+    folds = {0: ['seq_1', 'seq_2', 'seq_3', 'seq_4']}
     train_file_names = []
     val_file_names = []
     ids = os.listdir(cropped_train_path)
