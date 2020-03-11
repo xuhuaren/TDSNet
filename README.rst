@@ -53,75 +53,33 @@ Data
 
 Method
 ------
-We evaluate 4 different deep architectures for segmentation: `U-Net`_, 2 modifications of `TernausNet`_, and a modification of `LinkNet`_. The output of the model is a pixel-by-pixel mask that shows the class of each pixel. Our winning submission to the MICCAI 2017 Endoscopic Vision Sub-Challenge uses slightly modified version of the original U-Net model.
 
-As an improvement over U-Net, we use similar networks with pre-trained encoders. TernausNet is a U-Net-like architecture that uses relatively simple pre-trained VGG11 or VGG16 networks as an encoder:
+Our proposed task decomposition framework as in figure. Given an input image (2D or 3D), we first use some convolutional operation to extract feature maps. Because of the diversity of the input 2D or 3D data, we design specific encoder for each of the three challenges in this paper. Then, we feed the extracted features to the task-task context ensemble module. The context ensemble module contains multi-scale dilated convolution, so the receptive fields are enlarged along the paths to combine features of different scales by different dilated rates. Moreover, the parallel context ensemble module is generated as task-task context ensemble module and each of module are connected by two branches which we called latent space. Finally, the network is decomposed from the latent space into three branches, corresponding to (1) the segmentation task, (2) the class task, and (3) the scene task. The decoders are trained for each decomposed task, including up sampling for the segmentation task, and also global average pooling, fully-connected layers and sigmoid or softmax activation function for the class and scene tasks. Note that the three decomposed tasks share the same latent space for decoding. Moreover, we adopt task synchronization to help the model training. Besides, such a regularize structure also suppresses the noises in the features from the shallow layers and produces accurate semantic predictions.
 
-.. figure:: images/TernausNet.png
-    :scale: 65 %
-
-|br|
-|br|
-
-LinkNet model uses an encoder based on a ResNet-type architecture. In this work, we use pre-trained ResNet34. The decoder of the network consists of several decoder blocks that are connected with the corresponding encoder block. Each decoder block includes 1 |times| 1 convolution operation that reduces the number of filters by 4, followed by batch normalization and transposed convolution to upsample the feature map:
-
-.. figure:: images/LinkNet34.png
-    :scale: 72 %
+    .. figure:: images/fig4.png
+        :scale: 100 %
+        :align: center
 
 Training
 --------
 
-We use Jaccard index (Intersection Over Union) as the evaluation metric. It can be interpreted as a similarity measure between a finite number of sets. For two sets A and B, it can be defined as following:
+1) Initialize the parameter (segmentation task) of the shared fully convolutional part using the pretrained net.
+Initialize the parameters randomly from the normal distribution. 2) Based on 1), utilize SGD to train the segmentation-related net for updating these parameter and resulting. 3) Based on 1) and 2) utilize SGD to train the segmentation and class related net for updating these parameter. We train the segmentation and class tasks parameter together. 4) We utilize the early estimated parameters as initialization including 2) and 3), then refine the segmentation and class tasks with sync-regularization enforced with parameter. 5) We add in the scene task parameter and refine all of loss functions joint.
 
-.. raw:: html
-
-    <figure>
-        <img src="images/iou.gif" align="center"/>
-    </figure>
-
-Since an image consists of pixels, the expression can be adapted for discrete objects in the following way:
-
-.. figure:: images/jaccard.gif
-    :align: center
-
-where |y| and |y_hat| are a binary value (label) and a predicted probability for the pixel |i|, respectively.
-
-Since image segmentation task can also be considered as a pixel classification problem, we additionally use common classification loss functions, denoted as H. For a binary segmentation problem H is a binary cross entropy, while for a multi-class segmentation problem H is a categorical cross entropy.
-
-.. figure:: images/loss.gif
-    :align: center
-
-As an output of a model, we obtain an image, where every pixel value corresponds to a probability of belonging to the area of interest or a class. The size of the output image matches the input image size. For binary segmentation, we use 0.3 as a threshold value (chosen using validation dataset) to binarize pixel probabilities. All pixel values below the specified threshold are set to 0, while all values above the threshold are set to 255 to produce final prediction mask. For multi-class segmentation we use similar procedure, but we assign different integer numbers for each class.
-
-Results
+Results for ROBOT18
 -------
 
-For binary segmentation the best results is achieved by TernausNet-16 with IoU=0.836 and Dice=0.901. These are the best values reported in the literature up to now (`Pakhomov`_, `Garcia`_). Next, we consider multi-class segmentation of different parts of instruments. As before, the best results reveals TernausNet-16 with IoU=0.655 and Dice=0.760. For the multi-class instrument segmentation task the results look less optimistic. In this case the best model is TernausNet-11 with IoU=0.346 and Dice=0.459 for 7 class segmentation. Lower performance can be explained by the relatively small dataset size. There are 7 instrument classes and some of them appear just few times in the training dataset. Nevertheless, in the competition we achieved the best performance in this sub-category too.
+Our method has demonstrated top-tier performance in the on-site testing set in ROBOT18 (rank second, IoU=61%, compared to 62% of the challenge winner), note that our method could outperformed others in intestine and kidney class. We also proposed a deep learning model testing strategy to combine a variety of input sizes, hyper-parameters of network in the segmentation task as ensemble inference framework which is our main contribution in our challenge paper. Meanwhile, removing small regions in segmentation map also adopted as post-processing module. The on-site test data IoU score is different with what is shown in Table, note that all the method details can be observed in challenge paper. Since the images in the on-site testing set and the validation set are not coherent with each other. We have also provided visual inspection of typical segmentation results of ROBOT18 in Fig including challenge winner solution OTH Regensberg, where our method clearly performs better than the alternatives under consideration.
 
-.. raw:: html
+    .. figure:: images/fig5.PNG
+        :scale: 100 %
+        :align: center
 
-    <figure>
-        <img src="images/grid-1-41.png" width="60%" height="auto" align="center"/>
-        <figcaption>Comparison between several architectures for binary and multi-class segmentation.</figcaption>
-    </figure>
-|
-|
-|
+Here are some visualize results.
 
-.. table:: Segmentation results per task. Intersection over Union, Dice coefficient and inference time, ms.
-
-    ============= ========= ========= ========= ========= ========= ====== ========= ========= =======
-    Task:         Binary segmentation           Parts segmentation         Instrument segmentation
-    ------------- ----------------------------- -------------------------- ---------------------------
-    Model         IOU, %    Dice, %   Time      IOU, %    Dice, %   Time     IOU, %  Dice, %   Time
-    ============= ========= ========= ========= ========= ========= ====== ========= ========= =======
-    U-Net         75.44     84.37     93.00     48.41     60.75     106    15.80     23.59     **122**
-    TernausNet-11 81.14     88.07     142.00    62.23     74.25     157    **34.61** **45.86** 173
-    TernausNet-16 **83.60** **90.01** 184.00    **65.50** **75.97** 202    33.78     44.95     275
-    LinkNet-34    82.36     88.87     **88.00** 34.55     41.26     **97** 22.47     24.71     177
-    ============= ========= ========= ========= ========= ========= ====== ========= ========= =======
-
-Pre-trained weights for all model of all segmentation tasks can be found at `google drive`_
+    .. figure:: images/fig6.png
+        :scale: 100 %
+        :align: center
 
 Dependencies
 ------------
