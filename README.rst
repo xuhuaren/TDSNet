@@ -160,7 +160,7 @@ The dataset is organized in the folloing way:
     |   |   |   `-- frame148.png
     |-- predictions
 
-We have uploaded some ROBOT18 dataset in Google Drive.
+We have uploaded some ROBOT18 dataset in `Google Drive <https://drive.google.com/drive/folders/1bVleWfxUVXvCY6khhKEQWe8wiLip99KU?usp=sharing>`_. Considering these data not owned by us, we just upload a few images to help audience train and test code.
 
 1. Preprocessing
 ~~~~~~~~~~~~~~~~~~~~~~
