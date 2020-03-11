@@ -35,15 +35,21 @@ Data
 ----
 `ROBOT18 <https://endovissub2017-roboticinstrumentsegmentation.grand-challenge.org/>`_: The entire challenge dataset was made up of 19 sequences which were divided into 15 training sets and 4 test sets. Each sequence came from a single porcine training procedure recorded on da Vinci X or Xi system using specialized recording hardware. Sections of the procedure which contained significant camera motion or tissue interaction were extracted and subsampled to 1 Hz. Similar frames were manually removed until the sequence contained 300 frames. Each frame consists of a stereo pair with SXGA resolution 1280×1024 and intrinsic and extrinsic camera calibrations that were acquired during endoscope manufacture.
 
-.. image:: images/fig1.PNG
+    <figure>
+        <img src="images/fig1.PNG" width="100%" height="auto" align="center"/>
+    </figure>
 
 `BRATS18 <https://www.med.upenn.edu/sbia/brats2018.html>`_: All BraTS multimodal scans are available as NIfTI files (.nii.gz) and describe a) native (T1) and b) post-contrast T1-weighted (T1Gd), c) T2-weighted (T2), and d) T2 Fluid Attenuated Inversion Recovery (FLAIR) volumes, and were acquired with different clinical protocols and various scanners from multiple (n=19) institutions, mentioned as data contributors here. All the imaging datasets have been segmented manually, by one to four raters, following the same annotation protocol, and their annotations were approved by experienced neuro-radiologists. Annotations comprise the GD-enhancing tumor (ET — label 4), the peritumoral edema (ED — label 2), and the necrotic and non-enhancing tumor core (NCR/NET — label 1), as described in the BraTS reference paper, published in IEEE Transactions for Medical Imaging. The provided data are distributed after their pre-processing, i.e. co-registered to the same anatomical template, interpolated to the same resolution (1 mm) and skull-stripped.
 
-.. image:: images/fig2.png
+    <figure>
+        <img src="images/fig2.png" width="100%" height="auto" align="center"/>
+    </figure>
 
 `REFUGE18 <https://refuge.grand-challenge.org/Details/>`_: A total of 1200 color fundus photographs are available. The dataset is split 1:1:1 into 3 subsets equally for training, offline validation and onsite test, stratified to have equal glaucoma presence percentage. Training set with a total of 400 color fundus image will be provided together with the corresponding glaucoma status and the unified manual pixel-wise annotations (a.k.a. ground truth). Testing consists of 800 color fundus images and is further split into 400 off-site validation set images and 400 on-site test set images.
 
-.. image:: images/fig3.jpg
+    <figure>
+        <img src="images/fig3.jpg" width="100%" height="auto" align="center"/>
+    </figure>
 
 Method
 ------
