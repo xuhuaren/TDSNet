@@ -133,23 +133,6 @@ The dataset is organized in the folloing way:
     |   |       |-- frame004.png
     |   |       |-- frame005.png
     |   |       `-- frame148.png
-    |   |-- seq_16
-    |   |   |-- images
-    |   |   |   |-- frame000.png
-    |   |   |   |-- frame001.png
-    |   |   |   |-- frame002.png
-    |   |   |   |-- frame003.png
-    |   |   |   |-- frame004.png
-    |   |   |   |-- frame005.png
-    |   |   |   `-- frame148.png
-    |   |   `-- instruments_masks
-    |   |       |-- frame000.png
-    |   |       |-- frame001.png
-    |   |       |-- frame002.png
-    |   |       |-- frame003.png
-    |   |       |-- frame004.png
-    |   |       |-- frame005.png
-    |   |       `-- frame148.png
     |-- raw
     |   |-- seq_1
     |   |   |-- labels
@@ -177,16 +160,22 @@ The dataset is organized in the folloing way:
     |   |   |   `-- frame148.png
     |-- predictions
 
-The training dataset contains only 8 videos with 255 frames each. Inside each video all frames are correlated, so, for 4-fold cross validation of our experiments, we split data using this dependance i.e utilize whole video for the validation. In such a case, we try to make every fold to contain more or less equal number of instruments. The test dataset consists of 8x75-frame sequences containing footage sampled immediately after each training sequence and 2 full 300-frame sequences, sampled at the same rate as the training set. Under the terms of the challenge, participants should exclude the corresponding training set when evaluating on one of the 75-frame sequences. 
+We have uploaded some ROBOT18 dataset in Google Drive.
 
 1. Preprocessing
 ~~~~~~~~~~~~~~~~~~~~~~
-As a preprocessing step we cropped black unindormative border from all frames with a file ``prepare_data.py`` that creates folder ``data/cropped_train.py`` with masks and images of the smaller size that are used for training. Then, to split the dataset for 4-fold cross-validation one can use the file: ``prepare_train_val``.
+As a preprocessing step we cropped some image and transfer color label image to number one.
 
+You can check ``python prepare.py --help`` will return set of all possible input parameters. And just run this bash file, the pre-processing work would be done.
+
+::
+
+    #!/bin/bash
+    bash prepare.sh
 
 2. Training
 ~~~~~~~~~~~~~~~~~~~~~~
-The main file that is used to train all models -  ``train.py``.
+The main file that is used to train all models ``train.py``.
 
 Running ``python train.py --help`` will return set of all possible input parameters.
 
@@ -195,80 +184,30 @@ To train all models we used the folloing bash script :
 ::
 
     #!/bin/bash
-
-    for i in 0 1 2 3
-    do
-       python train.py --device-ids 0,1,2,3 --batch-size 16 --fold $i --workers 12 --lr 0.0001 --n-epochs 10 --type binary --jaccard-weight 1
-       python train.py --device-ids 0,1,2,3 --batch-size 16 --fold $i --workers 12 --lr 0.00001 --n-epochs 20 --type binary --jaccard-weight 1
-    done
+    bash train.sh
 
 
-3. Mask generation
+3. Mask generation and Evaluation
 ~~~~~~~~~~~~~~~~~~~~~~
-The main file to generate masks is ``generate_masks.py``.
+The main file to generate masks is ``test.py``.
 
-Running ``python generate_masks.py --help`` will return set of all possible input parameters.
+Running ``python test.py --help`` will return set of all possible input parameters.
 
-Example:
-:: 
-    python generate_masks.py --output_path predictions/unet16/binary --model_type UNet16 --problem_type binary --model_path data/models/unet16_binary_20 --fold -1 --batch-size 4
+The evaluation is different for a multi-class segmentation: In the case of multi-class segmentation it calculates jaccard (dice) for every class independently then avaraged them for each image and then for every video.
 
-4. Evaluation
-~~~~~~~~~~~~~~~~~~~~~~
-The evaluation is different for a binary and multi-class segmentation: 
+To test all models we used the folloing bash script :
 
-[a] In the case of binary segmentation it calculates jaccard (dice) per image / per video and then the predictions are avaraged. 
-
-[b] In the case of multi-class segmentation it calculates jaccard (dice) for every class independently then avaraged them for each image and then for every video
 ::
 
-    python evaluate.py --target_path predictions/unet16 --problem_type binary --train_path data/cropped_train
+    #!/bin/bash
+    bash test.sh
+
 
 5. Further Improvements
 ~~~~~~~~~~~~~~~~~~~~~~
 
-Our results can be improved further by few percentages using simple rules such as additional augmentation of train images and train the model for longer time. In addition, the cyclic learning rate or cosine annealing could be also applied. To do it one can use our pre-trained weights as initialization. To improve test prediction TTA technique could be used as well as averaging prediction from all folds.
+BRATS18 TODO
+
+REFUGE18 TODO
 
 
-6. Demo Example
-~~~~~~~~~~~~~~~~~~~~~~
-You can easily start working with our models using the demonstration example
-  `Demo.ipynb`_
-
-..  _`Demo.ipynb`: https://github.com/ternaus/robot-surgery-segmentation/blob/master/Demo.ipynb
-.. _`Alexander Rakhlin`: https://www.linkedin.com/in/alrakhlin/
-.. _`Alexey Shvets`: https://www.linkedin.com/in/shvetsiya/
-.. _`Vladimir Iglovikov`: https://www.linkedin.com/in/iglovikov/
-.. _`Alexandr A. Kalinin`: https://alxndrkalinin.github.io/
-.. _`MICCAI 2017 Robotic Instrument Segmentation Sub-Challenge`: https://endovissub2017-roboticinstrumentsegmentation.grand-challenge.org/
-.. _`da Vinci Xi surgical system`: https://intuitivesurgical.com/products/da-vinci-xi/
-.. _`TernausNet`: https://arxiv.org/abs/1801.05746
-.. _`U-Net`: https://arxiv.org/abs/1505.04597
-.. _`LinkNet`: https://arxiv.org/abs/1707.03718
-.. _`Garcia`: https://arxiv.org/abs/1706.08126
-.. _`Pakhomov`: https://arxiv.org/abs/1703.08580
-.. _`google drive`: https://drive.google.com/open?id=13e0C4fAtJemjewYqxPtQHO6Xggk7lsKe
-
-.. |br| raw:: html
-
-   <br />
-
-.. |plusmn| raw:: html
-
-   &plusmn
-
-.. |times| raw:: html
-
-   &times
-
-.. |micro| raw:: html
-
-   &microm
-
-.. |gif1| image:: images/original-min.gif
-.. |gif2| image:: images/binary-min.gif
-.. |gif3| image:: images/parts-min.gif
-.. |gif4| image:: images/types-min.gif
-.. |y| image:: images/y.gif
-.. |y_hat| image:: images/y_hat.gif
-.. |i| image:: images/i.gif
