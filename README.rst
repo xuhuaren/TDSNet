@@ -81,23 +81,33 @@ Here are some visualize results.
         :scale: 100 %
         :align: center
 
+Results for BRATS18
+-------
+TO DO
+
+Results for REFUGE18
+-------
+TO DO
+
 Dependencies
 ------------
 
-* Python 3.6
-* PyTorch 0.4.0
+* Anaconda with Python 3.7
+* PyTorch 0.4.1
 * TorchVision 0.2.1
-* numpy 1.14.0
-* opencv-python 3.3.0.10
-* tqdm 4.19.4
+* albumentations 0.0.4
+* Pillow 6.1
+* tqdm
+* scikit-learn
 
-To install all these dependencies you can run
+To install all these dependencies, we have designed a script which could build all the requirement.
 ::
-    pip install -r requirements.txt
+    #!/bin/bash
+    bash init.sh
 
 
 
-How to run
+Run our code
 ----------
 
 The dataset is organized in the folloing way:
