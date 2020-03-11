@@ -33,15 +33,10 @@ In general, we summarize our major contributions in this paper as follows:
 
 Data
 ----
-The training dataset consists of 8 |times| 225-frame sequences of high resolution stereo camera images acquired from a `da Vinci Xi surgical system`_ during several different porcine procedures. Training sequences are provided with 2 Hz frame rate to avoid redundancy. Every video sequence consists of two stereo channels taken from left and right cameras and has a 1920 |times| 1080 pixel resolution in RGB format. The articulated parts of the robotic surgical instruments, such as a rigid shaft, an articulated wrist and claspers have been hand labelled in each frame. Furthermore, there are instrument type labels that categorize instruments in following categories: left/right prograsp forceps, monopolar curved scissors, large needle driver, and a miscellaneous category for any other surgical instruments.
+2018 Robotic Scene Segmentation Challenge: The entire challenge dataset was made up of 19 sequences which were divided into 15 training sets and 4 test sets. Each sequence came from a single porcine training procedure recorded on da Vinci X or Xi system using specialized recording hardware. Sections of the procedure which contained significant camera motion or tissue interaction were extracted and subsampled to 1 Hz. Similar frames were manually removed until the sequence contained 300 frames. Each frame consists of a stereo pair with SXGA resolution 1280×1024 and intrinsic and extrinsic camera calibrations that were acquired during endoscope manufacture.
 
-.. class:: center
+.. image:: images/fig1.PNG
 
-    |gif1| |gif2|
-    |br|
-    |gif3| |gif4|
-    |br|
-    Original sequence (top left). Binary segmentation, 2-class (top right). Parts, 3-class (bottom left). Instruments, 7-class (bottom right)
 
 Method
 ------
