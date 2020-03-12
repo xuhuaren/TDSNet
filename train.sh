@@ -8,7 +8,7 @@ CUDA_VISIBLE_DEVICES=7 python train.py --batch-size 1 --fold 0 --workers 4 --lr 
 wait
 CUDA_VISIBLE_DEVICES=7 python train.py --batch-size 1 --fold 0 --workers 4 --lr 0.00005 --n-epochs 50 --model TDSNet --alpha 0.2 --beta 0.6 --gama 0.0
 wait
-CUDA_VISIBLE_DEVICES=7 python train.py --batch-size 1 --fold 0 --workers 4 --lr 0.00003 --n-epochs 60 --model TDSNet --alpha 0.2 --beta 0.6 --gama 0.2
+CUDA_VISIBLE_DEVICES=7 python train.py --batch-size 1 --fold 0 --workers 4 --lr 0.00005 --n-epochs 70 --model TDSNet --alpha 0.2 --beta 0.6 --gama 0.2
 
 
 
