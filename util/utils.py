@@ -108,7 +108,7 @@ def train(args, model, criterion, train_loader, valid_loader, validation, init_o
 
                 loss_scene = F.cross_entropy(output_scene, scene_gt)
                 
-                class_pre = [[1 if output_seg[0, c,:,:].sum()>0 else 0 for c in range(num_classes)]]
+                class_pre = [[1 if (torch.exp(output_seg[0, c,:,:]) > 0.5).sum()>0 else 0 for c in range(num_classes)]]
                 class_pre = torch.cuda.FloatTensor(class_pre)
                 
                 loss_sync = F.binary_cross_entropy(F.sigmoid(output_class), class_pre)
